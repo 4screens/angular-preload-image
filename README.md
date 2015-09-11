@@ -41,15 +41,6 @@ angular.module('app', ['angular-preload-image']);
 
 MIT
 
-#Demo
-
-Check out the [demo](http://revillweb.github.io/angular-preload-image/) for an example of pre-loading background images and pre-loading standard images with AngularJS.
-
-#TO DO
-
-* Ability to know when all pre-loaded images have finished loading within the page
-* Extensive cross browser and device testing + fixes
- 
 #Credit
 
 Inspiration taken from Ben Nadel's [post](http://www.bennadel.com/blog/2597-preloading-images-in-angularjs-with-promises.htm) about pre-loading images.
