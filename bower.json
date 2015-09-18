@@ -2,7 +2,8 @@
   "name": "angular-preload-image",
   "version": "0.1.1",
   "authors": [
-    "leon <leon@revillwebdesign.com>"
+    "leon <leon@revillwebdesign.com>",
+    "Bohdan Kostko <bohdan.kostko@nopattern.net>"
   ],
   "description": "Easily pre-load images in your AngularJS apps",
   "main": "angular-preload-image.min.js",
