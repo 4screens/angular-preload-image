@@ -5,6 +5,7 @@ var plugins = require('gulp-load-plugins')();
 var pkg = require('./package.json');
 var path = require('path');
 var sh = require('shelljs');
+var semver = require('semver');
 
 plugins.minimist = require('minimist')(process.argv.slice(2));
 
@@ -82,6 +83,8 @@ gulp.task('release::dist::push', ['release::dist::merge'], function(done) {
 });
 
 gulp.task('release::dist::tag', ['release::dist::push'], function(done) {
+  pkg.version = semver.inc(pkg.version, 'patch');
+
   return plugins.git.tag('v' + pkg.version, 'v' + pkg.version, {cwd: PATH.dist}, function(err) {
     if (err) {
       throw err;
