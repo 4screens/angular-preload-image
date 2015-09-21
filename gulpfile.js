@@ -60,7 +60,23 @@ gulp.task('develop', ['minify'], function() {
   gulp.watch(MAIN, ['lint']);
 });
 
-gulp.task('release::dist::merge', ['minify'], function() {
+gulp.task('release::dist::version', ['minify'], function() {
+  pkg.version = semver.inc(pkg.version, 'patch');
+
+  return gulp.src(CONFIG_FILES)
+    .pipe(plugins.bump({
+      version: pkg.version
+    }))
+    .pipe(gulp.dest(PATH.build));
+});
+
+gulp.task('release::dist::commit', ['release::dist::version'], function() {
+  return gulp.src(['./bower.json', './package.json'])
+    .pipe(plugins.git.add())
+    .pipe(plugins.git.commit('chore(release): Bump version.'));
+});
+
+gulp.task('release::dist::merge', ['release::dist::commit'], function() {
   return plugins.git.checkout(BRANCH.master, function() {
     plugins.git.merge(BRANCH.develop);
   });
@@ -84,17 +100,7 @@ gulp.task('release::dist::push', ['release::dist::merge'], function(done) {
   });
 });
 
-gulp.task('release::dist::version', ['release::dist::push'], function() {
-  pkg.version = semver.inc(pkg.version, 'patch');
-
-  return gulp.src(CONFIG_FILES)
-    .pipe(plugins.bump({
-      version: pkg.version
-    }))
-    .pipe(gulp.dest(PATH.build));
-});
-
-gulp.task('release::dist::tag', ['release::dist::version'], function(done) {
+gulp.task('release::dist::tag', ['release::dist::push'], function(done) {
 
   return plugins.git.tag('v' + pkg.version, 'v' + pkg.version, {cwd: PATH.dist}, function(err) {
     if (err) {
