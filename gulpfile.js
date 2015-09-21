@@ -95,5 +95,5 @@ gulp.task('release::dist::tag', ['release::dist::push'], function(done) {
 });
 
 gulp.task('release', ['release::dist::tag'], function() {
-
+  return plugins.git.checkout(BRANCH.develop);
 });
