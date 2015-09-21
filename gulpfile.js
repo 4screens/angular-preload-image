@@ -5,6 +5,7 @@ var plugins = require('gulp-load-plugins')();
 var pkg = require('./package.json');
 var path = require('path');
 var sh = require('shelljs');
+var semver = require('semver');
 
 plugins.minimist = require('minimist')(process.argv.slice(2));
 
@@ -19,6 +20,8 @@ var BRANCH = {
   develop: 'develop'
 };
 
+var CONFIG_FILES = ['./bower.json', './package.json'];
+
 var MAIN = 'angular-preload-image.js';
 
 gulp.task('minify', ['lint'], function() {
@@ -28,28 +31,28 @@ gulp.task('minify', ['lint'], function() {
       preserveComments: 'all'
     }))
     .pipe(plugins.rename({extname: '.min.js'}))
-    .pipe(plugins.sourcemaps.write('.'))
+    .pipe(plugins.sourcemaps.write(PATH.build))
     .pipe(gulp.dest(PATH.build));
 });
 
 gulp.task('publish', ['minify'], function() {
-  gulp.watch(MAIN, ['publish::copy']);
+  gulp.watch(PATH.dist + MAIN, ['publish::copy']);
 });
 
 gulp.task('publish::copy', ['lint'], function() {
-  return gulp.src(MAIN)
+  return gulp.src(PATH.dist + MAIN)
     .pipe(gulp.dest(plugins.minimist.path));
 });
 
 gulp.task('lint', function() {
-  return gulp.src('./' + MAIN)
+  return gulp.src(PATH.dist + MAIN)
     .pipe(plugins.jshint())
     .pipe(plugins.jshint.reporter('jshint-stylish'))
     .pipe(plugins.jshint.reporter('fail'));
 });
 
 gulp.task('jscs', function() {
-  return gulp.src('./' + MAIN)
+  return gulp.src(PATH.dist + MAIN)
     .pipe(plugins.jscs());
 });
 
@@ -82,6 +85,8 @@ gulp.task('release::dist::push', ['release::dist::merge'], function(done) {
 });
 
 gulp.task('release::dist::tag', ['release::dist::push'], function(done) {
+  pkg.version = semver.inc(pkg.version, 'patch');
+
   return plugins.git.tag('v' + pkg.version, 'v' + pkg.version, {cwd: PATH.dist}, function(err) {
     if (err) {
       throw err;
@@ -92,5 +97,11 @@ gulp.task('release::dist::tag', ['release::dist::push'], function(done) {
 });
 
 gulp.task('release', ['release::dist::tag'], function() {
+  plugins.git.checkout(BRANCH.develop);
 
+  return gulp.src(CONFIG_FILES)
+    .pipe(plugins.bump({
+      version: pkg.version
+    }))
+    .pipe(gulp.dest(PATH.build));
 });
