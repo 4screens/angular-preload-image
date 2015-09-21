@@ -84,8 +84,17 @@ gulp.task('release::dist::push', ['release::dist::merge'], function(done) {
   });
 });
 
-gulp.task('release::dist::tag', ['release::dist::push'], function(done) {
+gulp.task('release::dist::version', ['release::dist::push'], function() {
   pkg.version = semver.inc(pkg.version, 'patch');
+
+  return gulp.src(CONFIG_FILES)
+    .pipe(plugins.bump({
+      version: pkg.version
+    }))
+    .pipe(gulp.dest(PATH.build));
+});
+
+gulp.task('release::dist::tag', ['release::dist::version'], function(done) {
 
   return plugins.git.tag('v' + pkg.version, 'v' + pkg.version, {cwd: PATH.dist}, function(err) {
     if (err) {
@@ -98,10 +107,4 @@ gulp.task('release::dist::tag', ['release::dist::push'], function(done) {
 
 gulp.task('release', ['release::dist::tag'], function() {
   plugins.git.checkout(BRANCH.develop);
-
-  return gulp.src(CONFIG_FILES)
-    .pipe(plugins.bump({
-      version: pkg.version
-    }))
-    .pipe(gulp.dest(PATH.build));
 });
