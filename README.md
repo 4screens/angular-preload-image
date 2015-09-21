@@ -37,6 +37,22 @@ angular.module('app', ['angular-preload-image']);
 <img preload-image ng-src="[URL]" default-image="[URL]" fallback-image="[URL]" />
 ```
 
+#Develop
+
+You should work only in 'develop' branch
+
+##Publish task
+
+Copy your output to the project you're testing on
+
+```javascript
+gulp publish --path *PATH*
+```
+
+##Release and tag your versions
+
+gulp release
+
 #Licence
 
 MIT
