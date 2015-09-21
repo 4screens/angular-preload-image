@@ -20,6 +20,8 @@ var BRANCH = {
   develop: 'develop'
 };
 
+var CONFIG_FILES = ['./bower.json', './package.json'];
+
 var MAIN = 'angular-preload-image.js';
 
 gulp.task('minify', ['lint'], function() {
@@ -29,28 +31,28 @@ gulp.task('minify', ['lint'], function() {
       preserveComments: 'all'
     }))
     .pipe(plugins.rename({extname: '.min.js'}))
-    .pipe(plugins.sourcemaps.write('.'))
+    .pipe(plugins.sourcemaps.write(PATH.build))
     .pipe(gulp.dest(PATH.build));
 });
 
 gulp.task('publish', ['minify'], function() {
-  gulp.watch(MAIN, ['publish::copy']);
+  gulp.watch(PATH.dist + MAIN, ['publish::copy']);
 });
 
 gulp.task('publish::copy', ['lint'], function() {
-  return gulp.src(MAIN)
+  return gulp.src(PATH.dist + MAIN)
     .pipe(gulp.dest(plugins.minimist.path));
 });
 
 gulp.task('lint', function() {
-  return gulp.src('./' + MAIN)
+  return gulp.src(PATH.dist + MAIN)
     .pipe(plugins.jshint())
     .pipe(plugins.jshint.reporter('jshint-stylish'))
     .pipe(plugins.jshint.reporter('fail'));
 });
 
 gulp.task('jscs', function() {
-  return gulp.src('./' + MAIN)
+  return gulp.src(PATH.dist + MAIN)
     .pipe(plugins.jscs());
 });
 
@@ -82,8 +84,17 @@ gulp.task('release::dist::push', ['release::dist::merge'], function(done) {
   });
 });
 
-gulp.task('release::dist::tag', ['release::dist::push'], function(done) {
+gulp.task('release::dist::version', ['release::dist::push'], function() {
   pkg.version = semver.inc(pkg.version, 'patch');
+
+  return gulp.src(CONFIG_FILES)
+    .pipe(plugins.bump({
+      version: pkg.version
+    }))
+    .pipe(gulp.dest(PATH.build));
+});
+
+gulp.task('release::dist::tag', ['release::dist::version'], function(done) {
 
   return plugins.git.tag('v' + pkg.version, 'v' + pkg.version, {cwd: PATH.dist}, function(err) {
     if (err) {
@@ -95,5 +106,5 @@ gulp.task('release::dist::tag', ['release::dist::push'], function(done) {
 });
 
 gulp.task('release', ['release::dist::tag'], function() {
-  return plugins.git.checkout(BRANCH.develop);
+  plugins.git.checkout(BRANCH.develop);
 });
