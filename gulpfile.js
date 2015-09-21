@@ -57,15 +57,7 @@ gulp.task('develop', ['minify'], function() {
   gulp.watch(MAIN, ['lint']);
 });
 
-gulp.task('release::dist::commit', ['minify'], function() {
-  plugins.git.checkout(BRANCH.develop);
-
-  return gulp.src(PATH.dist)
-    .pipe(plugins.git.add())
-    .pipe(plugins.git.commit('feat(release): New release.'));
-});
-
-gulp.task('release::dist::merge', ['release::dist::commit'], function() {
+gulp.task('release::dist::merge', ['minify'], function() {
   return plugins.git.checkout(BRANCH.master, function() {
     plugins.git.merge(BRANCH.develop);
   });
