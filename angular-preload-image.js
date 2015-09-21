@@ -1,6 +1,6 @@
-'use strict';
-
 (function (angular) {
+  'use strict';
+
   angular.module('angular-preload-image', []);
 
   angular.module('angular-preload-image').factory('preLoader', function () {
