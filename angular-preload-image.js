@@ -14,8 +14,21 @@
     };
   });
 
-  angular.module('angular-preload-image').directive('preloadImage', ['preLoader',
-    function (preLoader) {
+  angular.module('angular-preload-image').directive('preloadImage', ['preLoader', '$timeout',
+    function (preLoader, $timeout) {
+
+      var outdatedTry = function(timeout, url, attrs) {
+        $timeout(
+          function() {
+            preLoader(url, function () {
+              attrs.$set('src', url);
+            }, function () {
+              outdatedTry(timeout * 2 || 1000, url, attrs);
+            });
+          },
+          timeout
+        );
+      };
 
       return {
         restrict: 'A',
@@ -28,25 +41,36 @@
 
           attrs.$set('src', scope.default);
 
-          preLoader(url, function () {
-            attrs.$set('src', url);
-          }, function () {
-            if (attrs.fallbackImage !== undefined) {
-              attrs.$set('src', attrs.fallbackImage);
-            }
-          });
+          outdatedTry(0, url, attrs);
         }
       };
     }
   ]);
 
-  angular.module('angular-preload-image').directive('preloadBgImage', ['preLoader',
-    function (preLoader) {
+  angular.module('angular-preload-image').directive('preloadBgImage', ['preLoader', '$timeout',
+    function (preLoader, $timeout) {
+
+      var outdatedTry = function(timeout, element, attrs) {
+        $timeout(
+          function() {
+            preLoader(attrs.preloadBgImage, function () {
+              element.css({
+                'background-image': 'url("' + attrs.preloadBgImage + '")'
+              });
+            }, function () {
+              outdatedTry(timeout * 2 || 1000, element, attrs);
+            });
+          },
+          timeout
+        );
+      };
 
       return {
         restrict: 'A',
         link: function (scope, element, attrs) {
+
           if (attrs.preloadBgImage !== undefined) {
+
             //Define default image
             scope.default = attrs.defaultImage || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wEWEygNWiLqlwAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAAAMSURBVAjXY/j//z8ABf4C/tzMWecAAAAASUVORK5CYII=';
 
@@ -54,21 +78,11 @@
               'background-image': 'url("' + scope.default+'")'
             });
 
-            preLoader(attrs.preloadBgImage, function () {
-              element.css({
-                'background-image': 'url("' + attrs.preloadBgImage + '")'
-              });
-            }, function () {
-              if (attrs.fallbackImage !== undefined) {
-                element.css({
-                  'background-image': 'url("' + attrs.fallbackImage + '")'
-                });
-              }
-            });
+            outdatedTry(0, element, attrs);
           }
         }
       };
     }
   ]);
 
-})();
+})(angular);
