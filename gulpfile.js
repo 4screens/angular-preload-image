@@ -24,6 +24,12 @@ var CONFIG_FILES = ['./bower.json', './package.json'];
 
 var MAIN = 'angular-preload-image.js';
 
+var FILES = [ './angular-preload-image.css',
+              './angular-preload-image.js',
+              './angular-preload-image.js.map',
+              './angular-preload-image.min.js'
+            ];
+
 gulp.task('minify', ['lint'], function() {
   return gulp.src(path.join(PATH.build, MAIN))
     .pipe(plugins.sourcemaps.init({loadMaps: true}))
@@ -35,12 +41,12 @@ gulp.task('minify', ['lint'], function() {
     .pipe(gulp.dest(PATH.build));
 });
 
-gulp.task('publish', ['minify'], function() {
-  gulp.watch(PATH.dist + MAIN, ['publish::copy']);
+gulp.task('publish', ['publish::copy'], function() {
+  gulp.watch(FILES, ['publish::copy']);
 });
 
-gulp.task('publish::copy', ['lint'], function() {
-  return gulp.src(PATH.dist + MAIN)
+gulp.task('publish::copy', ['minify'], function() {
+  return gulp.src(FILES)
     .pipe(gulp.dest(plugins.minimist.path));
 });
 

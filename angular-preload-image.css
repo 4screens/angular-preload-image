@@ -1,3 +1,18 @@
-[preload-image] {
-  transition: height .3s;
+img[preload-image] {
+  transition: height .3s, opacity .3s;
+  opacity: 1;
+}
+
+img[preload-image].ng-preloader-loading {
+  height: 120px;
+  opacity: 0;
+  width: 100%;
+}
+
+img.ng-preloader-loading-spinner {
+  margin-top: -120px;
+}
+
+img[preload-image]:not(.ng-preloader-loading) + img.ng-preloader-loading-spinner {
+  display: none;
 }
