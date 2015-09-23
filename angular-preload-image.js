@@ -5,8 +5,8 @@
 
   angular.module('angular-preload-image').factory('preLoader', function () {
 
-    return function (url, successCallback, errorCallback) {
-      angular.element(new Image())
+    return function (url, img, successCallback, errorCallback) {
+      angular.element(img)
       .bind('load', function () {
         successCallback(this);
       }).bind('error', function () {
@@ -15,8 +15,8 @@
     };
   });
 
-  angular.module('angular-preload-image').directive('preloadImage', ['preLoader', '$timeout',
-    function (preLoader, $timeout) {
+  angular.module('angular-preload-image').directive('preloadImage', ['preLoader', '$timeout', '$window',
+    function (preLoader, $timeout, $window) {
       var firstStep = 1000;
       var step = 2;
       var className = 'ng-preloader-loading';
@@ -24,15 +24,15 @@
       var outdatedTry = function(timeout, url, attrs, limit, $el) {
         // Math stuff...
 
-        if (firstStep * Math.pow(step, limit - 1) === timeout) {
+        if (firstStep * Math.pow(step, limit - 1) === timeout || !$el) {
           return;
         }
 
         $timeout(
           function() {
-            preLoader(url, function (img) {
+            preLoader(url, $el[0], function () {
               $el.next().remove();
-              $el.css('max-height', img.height * step + 'px');
+              $el.css('max-height', $window.innerHeight + 'px');
               $timeout(function() {
                 $el.toggleClass(className);
               }, 300);
@@ -91,7 +91,7 @@
 
         $timeout(
           function() {
-            preLoader(url, function () {
+            preLoader(url, new Image(), function () {
               element.css({
                 'background-image': 'url("' + url + '")'
               }).toggleClass(className);
@@ -108,20 +108,26 @@
       return {
         restrict: 'A',
         link: function (scope, $element, attrs) {
-          var url = attrs.preloadBgImage;
           var limit = attrs.limit;
           var spinner = attrs.defaultImage || defaultSpinner;
 
-          if (!url) {
-            return;
-          }
+          scope.$watch('preloadBgImage', function(url) {
+            if (!url) {
+              return;
+            }
 
-          $element.css({
-            'background-image': 'url("' + spinner + '")'
-          }).toggleClass(className);
+            $element.addClass(className,function() {
+              $element.css({
+              'background-image': 'url("' + spinner + '")'
+              });
+            });
 
-          outdatedTry(0, $element, limit, url);
+            outdatedTry(0, $element, limit, url);
+          }, true);
 
+        },
+        scope: {
+          preloadBgImage: '@'
         }
       };
     }

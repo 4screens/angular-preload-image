@@ -11,9 +11,21 @@ img[preload-image].ng-preloader-loading {
 }
 
 img.ng-preloader-loading-spinner {
-  margin-top: -120px;
+  position: absolute;
+  margin: 0 !important;
+  padding: 0 !important;
+  left: 50%;
+  transform: translate(-50%, 0);
 }
 
 img[preload-image]:not(.ng-preloader-loading) + img.ng-preloader-loading-spinner {
   display: none;
+}
+
+[preload-bg-image] {
+  &.ng-preloader-bg-loading {
+    background-position: center center !important;
+    background-size: 60% !important;
+    background-repeat: no-repeat !important;
+  }
 }
