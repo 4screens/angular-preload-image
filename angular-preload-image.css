@@ -22,10 +22,8 @@ img[preload-image]:not(.ng-preloader-loading) + img.ng-preloader-loading-spinner
   display: none;
 }
 
-[preload-bg-image] {
-  &.ng-preloader-bg-loading {
-    background-position: center center !important;
-    background-size: 60% !important;
-    background-repeat: no-repeat !important;
-  }
+[preload-bg-image].ng-preloader-bg-loading {
+  background-position: center center !important;
+  background-size: 60% !important;
+  background-repeat: no-repeat !important;
 }
