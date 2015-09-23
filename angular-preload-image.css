@@ -1,11 +1,12 @@
 img[preload-image] {
-  transition: height .3s, opacity .3s;
+  transition: max-height .3s, opacity .3s;
   opacity: 1;
 }
 
 img[preload-image].ng-preloader-loading {
-  height: 120px;
+  max-height: 120px !important;
   opacity: 0;
+  height: 120px;
   width: 100%;
 }
 
