@@ -1,12 +1,14 @@
 img[preload-image] {
   transition: max-height .3s, opacity .3s;
+  transition-delay: 0s, .2s;
   opacity: 1;
+  width: 100%;
 }
 
 img[preload-image].ng-preloader-loading {
-  max-height: 120px !important;
+  max-height: 32px !important;
   opacity: 0;
-  height: 120px;
+  height: 32px;
   width: 100%;
 }
 
@@ -24,6 +26,6 @@ img[preload-image]:not(.ng-preloader-loading) + img.ng-preloader-loading-spinner
 
 [preload-bg-image].ng-preloader-bg-loading {
   background-position: center center !important;
-  background-size: 60% !important;
+  background-size: 50% !important;
   background-repeat: no-repeat !important;
 }
