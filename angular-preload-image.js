@@ -121,11 +121,6 @@
             });
 
           }, true);
-
-          scope.$on('$destroy', function() {
-            watch();
-          });
-
         },
         scope: {
           preloadBgImage: '@'
