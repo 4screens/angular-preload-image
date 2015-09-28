@@ -12,27 +12,25 @@
   })
 
   .factory('preLoader', ['Settings', '$timeout', function (Settings, $timeout) {
-    var listenForEl = function($el, successCallback, errorCallback, timeout) {
+    var listenForEl = function($el, url, successCallback, errorCallback, timeout) {
+      $el.off('load').off('error');
+
       $el.bind('load', function () {
         successCallback(this);
-        // angular.element(this).cleanData().remove();
-        console.log(this);
       }).bind('error', function () {
-        errorCallback(timeout);
-        // angular.element(this).cleanData().remove();
-        console.log(this);
-      });
+        errorCallback(timeout, $el);
+      }).attr('src', url);
     };
 
 
-    var outdatedTry = function($el, timeout, limit, successCallback, errorCallback) {
+    var outdatedTry = function($el, url, timeout, limit, successCallback, errorCallback) {
       if (Settings.firstStep * Math.pow(Settings.step, limit - 1) === timeout) {
         return;
       }
 
       $timeout(
         function() {
-          listenForEl($el, successCallback, errorCallback, timeout);
+          listenForEl($el, url, successCallback, errorCallback, timeout);
         },
         timeout
       );
@@ -57,6 +55,7 @@
           var spinner = attrs.defaultImage || Settings.defaultSpinner;
 
           var firstStep = Settings.firstStep;
+          var step = Settings.step;
           var className = Settings.className;
 
           if (!url) {
@@ -76,14 +75,30 @@
 
           $element.after($spinner);
 
-          preLoader.outdatedTry($element, 0, limit || 0, function() {
+          var successCallback = function() {
             $element.next().remove();
             $element.css('max-height', $window.innerHeight + 'px');
             $timeout(function() {
               $element.toggleClass(className);
             }, 300);
-          }, function(timeout) {
-            preLoader.outdatedTry(timeout * 2 || firstStep, url, attrs, $element);
+          };
+
+          var errorCallback = function(timeout) {
+            preLoader.outdatedTry($element,
+                                  url,
+                                  timeout * step || firstStep,
+                                  limit || 0,
+                                  successCallback,
+                                  errorCallback
+                                );
+          };
+
+          preLoader.outdatedTry($element, url, 0, limit || 0, successCallback, errorCallback);
+
+          scope.$on('$destroy', function() {
+            $element.off('load').off('error');
+            errorCallback = function() {};
+            successCallback = function() {};
           });
         }
       };
@@ -96,31 +111,58 @@
       return {
         restrict: 'A',
         link: function (scope, $element, attrs) {
+          var className = Settings.bgClassName;
+          var url;
+
           var firstStep = Settings.firstStep;
           var step = Settings.step;
-          var className = Settings.bgClassName;
 
           var limit = attrs.limit;
           var spinner = attrs.defaultImage || Settings.defaultSpinner;
 
-          var watch = scope.$watch('preloadBgImage', function(url) {
-            if (!url) {
+          var successCallback = function() {
+            $element.css({
+              'background-image': 'url("' + url + '")'
+            }).toggleClass(className);
+          };
+
+          var errorCallback = function(timeout, $el) {
+            preLoader.outdatedTry(
+              $el,
+              url,
+              timeout * step || firstStep,
+              limit || 0,
+              successCallback,
+              errorCallback
+            );
+          };
+
+          var watch = scope.$watch('preloadBgImage', function(_url) {
+            if (!_url) {
               return;
+            } else {
+              url = _url;
             }
 
             $element.addClass(className).css({
               'background-image': 'url("' + spinner + '")'
             });
 
-            preLoader.outdatedTry(angular.element(new Image()).attr('src', url), 0, limit || 0, function() {
-              $element.css({
-                'background-image': 'url("' + url + '")'
-              }).toggleClass(className);
-            }, function(timeout) {
-              preLoader.outdatedTry(timeout * step || firstStep, $element, limit, url);
-            });
+            preLoader.outdatedTry(
+              angular.element(new Image()),
+              url,
+              0,
+              limit || 0,
+              successCallback,
+              errorCallback);
 
           }, true);
+
+          scope.$on('$destroy', function() {
+            watch();
+            errorCallback = function() {};
+            successCallback = function() {};
+          });
         },
         scope: {
           preloadBgImage: '@'
