@@ -75,12 +75,19 @@
 
           $element.after($spinner);
 
+          var disconnectWatchers = function() {
+            $element.off('load').off('error');
+            errorCallback = function() {};
+            successCallback = function() {};
+          };
+
           var successCallback = function() {
             $element.next().remove();
             $element.css('max-height', $window.innerHeight + 'px');
             $timeout(function() {
               $element.toggleClass(className);
             }, 300);
+            disconnectWatchers();
           };
 
           var errorCallback = function(timeout) {
@@ -95,11 +102,7 @@
 
           preLoader.outdatedTry($element, url, 0, limit || 0, successCallback, errorCallback);
 
-          scope.$on('$destroy', function() {
-            $element.off('load').off('error');
-            errorCallback = function() {};
-            successCallback = function() {};
-          });
+          scope.$on('$destroy', disconnectWatchers);
         }
       };
     }
@@ -114,16 +117,25 @@
           var className = Settings.bgClassName;
           var url;
 
+          scope.preloadBgImage = scope.$eval(attrs.preloadBgImage);
+
           var firstStep = Settings.firstStep;
           var step = Settings.step;
 
           var limit = attrs.limit;
           var spinner = attrs.defaultImage || Settings.defaultSpinner;
 
+          var disconnectWatchers = function() {
+            watch();
+            errorCallback = function() {};
+            successCallback = function() {};
+          };
+
           var successCallback = function() {
             $element.css({
               'background-image': 'url("' + url + '")'
             }).toggleClass(className);
+            disconnectWatchers();
           };
 
           var errorCallback = function(timeout, $el) {
@@ -137,36 +149,33 @@
             );
           };
 
-          var watch = scope.$watch('preloadBgImage', function(_url) {
-            if (!_url) {
-              return;
-            } else {
-              url = _url;
-            }
+          var watch = scope.$watch(function() {
+              return attrs.preloadBgImage;
+            },
+            function(_url) {
+              if (!_url) {
+                return;
+              } else {
+                url = _url;
+              }
 
-            $element.addClass(className).css({
-              'background-image': 'url("' + spinner + '")'
-            });
+              $element.addClass(className).css({
+                'background-image': 'url("' + spinner + '")'
+              });
 
-            preLoader.outdatedTry(
-              angular.element(new Image()),
-              url,
-              0,
-              limit || 0,
-              successCallback,
-              errorCallback);
+              preLoader.outdatedTry(
+                angular.element(new Image()),
+                url,
+                0,
+                limit || 0,
+                successCallback,
+                errorCallback);
 
-          }, true);
+            }, true);
 
-          scope.$on('$destroy', function() {
-            watch();
-            errorCallback = function() {};
-            successCallback = function() {};
-          });
+          scope.$on('$destroy', disconnectWatchers);
         },
-        scope: {
-          preloadBgImage: '@'
-        }
+        scope: true
       };
     }
   ]);
