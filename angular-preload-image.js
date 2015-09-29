@@ -62,18 +62,9 @@
             return;
           }
 
-          $element.after($spinner).toggleClass(className);
-
-          attrs.$set('src', url);
-
-          if ($element[0].complete) {
-            $element.toggleClass(className);
-            return;
-          }
-
           var $spinner = angular.element(new Image()).attr( { 'src': spinner, 'class': className + '-spinner' });
 
-          $element.after($spinner);
+          $element.after($spinner).toggleClass(className);
 
           var disconnectWatchers = function() {
             $element.off('load').off('error');
