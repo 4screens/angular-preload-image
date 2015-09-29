@@ -117,8 +117,6 @@
           var className = Settings.bgClassName;
           var url;
 
-          scope.preloadBgImage = scope.$eval(attrs.preloadBgImage);
-
           var firstStep = Settings.firstStep;
           var step = Settings.step;
 
