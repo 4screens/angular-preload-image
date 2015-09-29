@@ -13,13 +13,19 @@
 
   .factory('preLoader', ['Settings', '$timeout', function (Settings, $timeout) {
     var listenForEl = function($el, url, successCallback, errorCallback, timeout) {
-      $el.off('load').off('error');
+      if (successCallback) {
+        $el.one('load', function () {
+          successCallback($el);
+        });
+      }
 
-      $el.bind('load', function () {
-        successCallback(this);
-      }).bind('error', function () {
-        errorCallback(timeout, $el);
-      }).attr('src', url);
+      if (errorCallback) {
+        $el.one('error', function () {
+          errorCallback(timeout, $el);
+        });
+      }
+
+      $el.attr('src', url);
     };
 
 
@@ -66,19 +72,13 @@
 
           $element.after($spinner).toggleClass(className);
 
-          var disconnectWatchers = function() {
-            $element.off('load').off('error');
-            errorCallback = function() {};
-            successCallback = function() {};
-          };
-
           var successCallback = function() {
             $element.next().remove();
             $element.css('max-height', $window.innerHeight + 'px');
             $timeout(function() {
-              $element.toggleClass(className);
+              $element.removeClass(className);
             }, 300);
-            disconnectWatchers();
+            $element.off('load').off('error');
           };
 
           var errorCallback = function(timeout) {
@@ -86,14 +86,25 @@
                                   url,
                                   timeout * step || firstStep,
                                   limit || 0,
-                                  successCallback,
+                                  null,
                                   errorCallback
                                 );
           };
 
-          preLoader.outdatedTry($element, url, 0, limit || 0, successCallback, errorCallback);
+          attrs.$observe('ngSrc', function(url) {
+            preLoader.outdatedTry($element,
+                                  url,
+                                  0,
+                                  limit || 0,
+                                  successCallback,
+                                  errorCallback);
+          });
 
-          scope.$on('$destroy', disconnectWatchers);
+          scope.$on('$destroy', function() {
+            $element.off('load').off('error');
+            successCallback = function() {};
+            errorCallback = function() {};
+          });
         }
       };
     }
@@ -104,6 +115,7 @@
 
       return {
         restrict: 'A',
+        priority: 99,
         link: function (scope, $element, attrs) {
           var className = Settings.bgClassName;
           var url;
@@ -115,16 +127,15 @@
           var spinner = attrs.defaultImage || Settings.defaultSpinner;
 
           var disconnectWatchers = function() {
-            watch();
             errorCallback = function() {};
             successCallback = function() {};
           };
 
-          var successCallback = function() {
+          var successCallback = function($el) {
             $element.css({
               'background-image': 'url("' + url + '")'
-            }).toggleClass(className);
-            disconnectWatchers();
+            }).removeClass(className);
+            $el.off('load').off('error').remove();
           };
 
           var errorCallback = function(timeout, $el) {
@@ -133,22 +144,22 @@
               url,
               timeout * step || firstStep,
               limit || 0,
-              successCallback,
+              null,
               errorCallback
             );
           };
 
-          var watch = scope.$watch(function() {
-              return attrs.preloadBgImage;
-            },
+          attrs.$observe('preloadBgImage',
             function(_url) {
+
               if (!_url) {
                 return;
               } else {
                 url = _url;
               }
 
-              $element.addClass(className).css({
+              attrs.$addClass(className);
+              $element.css({
                 'background-image': 'url("' + spinner + '")'
               });
 
