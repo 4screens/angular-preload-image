@@ -134,8 +134,9 @@
           var successCallback = function($el) {
             $element.css({
               'background-image': 'url("' + url + '")'
-            }).removeClass(className);
+            });
             $el.off('load').off('error').remove();
+            attrs.$removeClass(className);
           };
 
           var errorCallback = function(timeout, $el) {
