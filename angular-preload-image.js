@@ -136,7 +136,7 @@
               'background-image': 'url("' + url + '")'
             });
             $el.off('load').off('error').remove();
-            attrs.$removeClass(className);
+            $element.removeClass(className);
           };
 
           var errorCallback = function(timeout, $el) {
@@ -159,7 +159,7 @@
                 url = _url;
               }
 
-              attrs.$addClass(className);
+              $element.addClass(className);
               $element.css({
                 'background-image': 'url("' + spinner + '")'
               });
