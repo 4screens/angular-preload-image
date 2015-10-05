@@ -1,20 +1,27 @@
 img[preload-image] {
-  transition: max-height .3s, opacity .3s;
-  transition-delay: 0s, .2s;
+  transition: opacity .3s;
+  transition-delay: .2s;
   opacity: 1;
   width: 100%;
 }
 
 img[preload-image].ng-preloader-loading {
-  max-height: 32px !important;
+  max-height: 32px;
   opacity: 0;
   height: 32px;
   width: 100%;
 }
 
+img[preload-image].ng-preloader-loading:not(.ng-preloader-loading-with-heigth){
+  transition: opacity .3s;
+}
+
 img.ng-preloader-loading-spinner {
   position: absolute;
-  margin: 0 !important;
+  margin-bottom: 0 !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  margin-top: 0;
   padding: 0 !important;
   left: 50%;
   transform: translate(-50%, 0);
