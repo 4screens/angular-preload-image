@@ -177,6 +177,7 @@
             function(_url) {
 
               if (!_url) {
+                $element.css('background-image', '');
                 return;
               } else {
                 url = _url;
