@@ -85,7 +85,7 @@
             $element.off('load').off('error');
 
             if (attrs.success) {
-              attrs.success();
+              scope.$apply(attrs.success);
             }
           };
 
@@ -167,7 +167,7 @@
 
 
             if (attrs.success) {
-              attrs.success();
+              scope.$apply(attrs.success);
             }
           };
 
