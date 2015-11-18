@@ -83,6 +83,10 @@
                       .css('max-height', 'auto');
             }, 300);
             $element.off('load').off('error');
+
+            if (attrs.success) {
+              attrs.success();
+            }
           };
 
           var errorCallback = function(timeout) {
@@ -160,6 +164,11 @@
             });
             $el.off('load').off('error').remove();
             $element.removeClass(className);
+
+
+            if (attrs.success) {
+              attrs.success();
+            }
           };
 
           var errorCallback = function(timeout, $el) {
