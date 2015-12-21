@@ -91,7 +91,7 @@
 
           var errorCallback = function(timeout) {
             preLoader.outdatedTry($element,
-                                  attrs.url,
+                                  attrs.ngSrc,
                                   timeout * step || firstStep,
                                   limit || 0,
                                   null,
