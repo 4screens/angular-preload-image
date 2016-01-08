@@ -79,8 +79,8 @@
             $element.css('max-height', $window.innerHeight + 'px');
             $timeout(function() {
               $element.removeClass(className)
-                      .css('height', 'auto')
-                      .css('max-height', 'auto');
+                      .css('height', '')
+                      .css('max-height', '');
             }, 300);
             $element.off('load').off('error');
 
