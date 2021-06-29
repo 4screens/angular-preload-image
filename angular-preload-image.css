@@ -33,6 +33,12 @@ img[preload-image]:not(.ng-preloader-loading) + img.ng-preloader-loading-spinner
 
 [preload-bg-image].ng-preloader-bg-loading {
   background-position: center center !important;
-  background-size: 5% !important;
+  background-size: 10% !important;
   background-repeat: no-repeat !important;
+}
+
+@media screen and (min-width: 1024) {
+  [preload-bg-image].ng-preloader-bg-loading {
+    background-size: 5% !important;
+  }
 }
