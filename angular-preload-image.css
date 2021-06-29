@@ -37,7 +37,7 @@ img[preload-image]:not(.ng-preloader-loading) + img.ng-preloader-loading-spinner
   background-repeat: no-repeat !important;
 }
 
-@media screen and (min-width: 1024) {
+@media screen and (min-width: 1024px) {
   [preload-bg-image].ng-preloader-bg-loading {
     background-size: 5% !important;
   }
